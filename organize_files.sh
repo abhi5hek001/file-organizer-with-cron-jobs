@@ -1,26 +1,32 @@
 #!/bin/bash
-# Core logic to organize files
+# Core file organizing logic
 
 organize_files() {
     local SOURCE="$1"
     local DEST="$2"
     local LOG="$3"
 
-    for file in "$SOURCE"/*; do
-        [ -f "$file" ] || continue
-        filename=$(basename "$file")
+    # Create destination directories
+    mkdir -p "$DEST"/{Images,Videos,Documents,Others}
 
-        # Detect type
-        mimetype=$(file --mime-type -b "$file")
-        case "$mimetype" in
-            image/*) folder="Images" ;;
-            video/*) folder="Videos" ;;
-            application/pdf|application/msword|application/vnd*) folder="Documents" ;;
-            *) folder="Others" ;;
+    # Move files based on their extensions
+    find "$SOURCE" -type f -exec bash -c '
+        file="$1"
+        dest="$2"
+        log="$3"
+        
+        case "${file,,}" in
+            *.jpg|*.jpeg|*.png|*.gif) category="Images" ;;
+            *.mp4|*.avi|*.mov|*.wmv) category="Videos" ;;
+            *.pdf|*.doc|*.docx|*.txt) category="Documents" ;;
+            *) category="Others" ;;
         esac
-
-        mkdir -p "$DEST/$folder"
-        mv "$file" "$DEST/$folder/"
-        log_action "Moved $filename to $folder" "$LOG"
-    done
+        
+        mv "$file" "$dest/$category/"
+        
+        if [ "$log" = true ]; then
+            source ./logger_and_cron.sh
+            log_action "Moved $(basename "$file") to $category" true
+        fi
+    ' _ {} "$DEST" "$LOG" \;
 }
