@@ -1,4 +1,4 @@
-# File Organizer CLI with Cron
+# File Organizer CLI with Cron Jobs
 
 A simple **Bash CLI tool** to automatically **organize files** in a directory based on their **type** (Images, Videos, Documents, Others) and optionally **log** the actions.  
 It can also be **automated using cron** to run hourly/daily.
