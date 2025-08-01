@@ -1,15 +1,27 @@
 #!/bin/bash
+# Main CLI Script
 
-echo "Downloads Organizer"
+source ./organize_files.sh
+source ./logger_and_cron.sh
 
-cd ~/Downloads
+LOG=false
+SOURCE=""
+DEST=""
 
-mkdir -p Images Documents Music
-
-for file in *; do
-	case "$file" in
-	*jpg|*png) mv "$file" Images/ ;;
-	*pdf|*doc|*docs|*docx) mv "$file" Documents ;;
-	*mp3) mv "$file" Music ;;
-	esac
+# Parse CLI arguments
+while getopts "s:d:l" opt; do
+  case $opt in
+    s) SOURCE="$OPTARG" ;;
+    d) DEST="$OPTARG" ;;
+    l) LOG=true ;;
+    *) echo "Usage: $0 -s <source> [-d <dest>] [-l]"; exit 1 ;;
+  esac
 done
+
+# Validate inputs
+[ -z "$SOURCE" ] && { echo "Error: Source directory required!"; exit 1; }
+[ -d "$SOURCE" ] || { echo "Error: Source is not a directory!"; exit 1; }
+[ -z "$DEST" ] && DEST="$SOURCE"
+
+# Call the core function
+organize_files "$SOURCE" "$DEST" "$LOG"
